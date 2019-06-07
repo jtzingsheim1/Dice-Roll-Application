@@ -1,49 +1,68 @@
+# Coursera Data Science Specialization Course 9 Project 3 Script----------------
+# Dice Roll! App
+
+
+# The purpose of this script is to complete the basic requirements behind the
+# project 3 peer-graded assignment which is part of the Developing Data Products
+# course from Johns Hopkins University within the Data Science Specialization on
+# Coursera.
 #
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+# The instructions say to create an interactive application using Shiny. This
+# project will meet the objective by creating a game where the user can place
+# wagers on the outcome of a roll of two dice.
+
 
 library(shiny)
+library(DT)
+
+
+# User Interface----------------------------------------------------------------
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui.dice <- fluidPage(
 
     # Application title
-    titlePanel("Old Faithful Geyser Data"),
+    titlePanel("Dice Roll!"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+            sliderInput("wager2",
+                        "Wager on 2:",
+                        value = 0,
+                        min = 0,
+                        max = 100,
+                        step = 1),
+            sliderInput("wager3",
+                         "Wager on 3:",
+                         value = 0,
+                         min = 0,
+                         max = 100),
+            sliderInput("wager4",
+                         "Wager on 4:",
+                         value = 0,
+                         min = 0,
+                         max = 100)
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot")
+           textOutput("total.wager")
         )
     )
 )
 
-# Define server logic required to draw a histogram
-server <- function(input, output) {
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+# Server Logic------------------------------------------------------------------
 
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
+server.dice <- function(input, output) {
+
+    output$total.wager <- renderText({
+        sum(input$wager2, input$wager3, input$wager4)
     })
 }
 
-# Run the application 
-shinyApp(ui = ui, server = server)
+# Run Application---------------------------------------------------------------
+
+shinyApp(ui = ui.dice, server = server.dice)
+
