@@ -19,6 +19,10 @@ library(tidyverse)
 
 # User Interface----------------------------------------------------------------
 
+slider.def <- 0
+slider.min <- 0
+slider.max <- 100
+
 ui <- fluidPage(
 
     # Application title
@@ -33,20 +37,60 @@ ui <- fluidPage(
             # Sliders for wagers
             sliderInput("wager2",
                         "Wager on 2:",
-                        value = 10,
-                        min = 0,
-                        max = 100),
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
             sliderInput("wager3",
                          "Wager on 3:",
-                         value = 10,
-                         min = 0,
-                         max = 100),
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
             sliderInput("wager4",
                          "Wager on 4:",
-                         value = 10,
-                         min = 0,
-                         max = 100),
-            
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+            sliderInput("wager5",
+                        "Wager on 5:",
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+            sliderInput("wager6",
+                        "Wager on 6:",
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+            sliderInput("wager7",
+                        "Wager on 7:",
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+            sliderInput("wager8",
+                        "Wager on 8:",
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+            sliderInput("wager9",
+                        "Wager on 9:",
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+            sliderInput("wager10",
+                        "Wager on 10:",
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+            sliderInput("wager11",
+                        "Wager on 11:",
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+            sliderInput("wager12",
+                        "Wager on 12:",
+                        value = slider.def,
+                        min = slider.min,
+                        max = slider.max),
+
             actionButton("roll", "Roll Dice!")
             
         ),
@@ -93,8 +137,10 @@ server <- function(input, output) {
         vars$dice.sum <- sum(vars$die1, vars$die2)
 
         # Lookup wagers placed and find winning wager
-        wagers <- c(rep(0, 5), input$wager2, input$wager3, input$wager4, rep(0, 4))
-        vars$win.wager <- wagers[vars$dice.sum]
+        wagers <- c(input$wager2, input$wager3, input$wager4, input$wager5,
+                    input$wager6, input$wager7, input$wager8, input$wager9,
+                    input$wager10, input$wager11, input$wager12)
+        vars$win.wager <- wagers[vars$dice.sum - 1]
         
         # Calculate payout, losses, net gain, and update token quantity
         vars$winnings <- vars$pay.ratio * vars$win.wager
@@ -107,7 +153,7 @@ server <- function(input, output) {
     # Render the dice results output
     output$dice.values <- renderText({
         RollButton()
-        paste("Die 1:", vars$die1, "Die 2:", vars$die2)
+        paste("First Die:", vars$die1, "Second Die:", vars$die2)
     })
     
     output$results1 <- renderText({
