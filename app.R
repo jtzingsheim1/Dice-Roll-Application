@@ -66,16 +66,16 @@ ui <- fluidPage(
 )
 
 
-# tokens <- 1000
-
-
 # Server Logic------------------------------------------------------------------
 
 server <- function(input, output) {
     
-    tokens <- reactiveValues()
-    tokens$a <- 1000
-    
+    # Setup shared variables
+    vars <- reactiveValues()
+        vars$tokens <- 1000  # Initial number of tokens
+        vars$die1 <- 0  # Initial die setting
+        vars$die2 <- 0  # Initial die setting
+
     # # Reactive expression to create data frame summary
     # WagerValues <- reactive({
     #     data.frame(
@@ -90,28 +90,32 @@ server <- function(input, output) {
     #     WagerValues()
     # })
     
-    # Get dice outcomes when Roll button is clicked
+    # Function to run when roll button is clicked
     RollButton <- eventReactive(input$roll, {
         
-        dice.values <- sample(1:6, 2, replace = TRUE)
-        dice.sum <- sum(dice.values)
+        # Roll the dice
+        vars$die1 <- sample(1:6, 1)
+        vars$die2 <- sample(1:6, 1)
+        dice.sum <- sum(vars$die1, vars$die2)
+
+        # Lookup wagers placed and find winning wager
+        wagers <- c(rep(0, 5), input$wager2, input$wager3, input$wager4, rep(0, 4))
+        win.wager <- wagers[dice.sum]
         
-        outcome <- c(2:12)
-        wagers <- c(rep(0, 4), input$wager2, input$wager3, input$wager4, rep(0, 4))
-        wager.table <- data.frame(outcome, wagers)
-        
-        win.wager <- filter(wager.table, outcome == dice.sum)[[2]]
+        # Calculate payout, losses, net gain, and update token quantity
         payout <- 10 * win.wager
-        losses <- sum(select(wager.table, wagers)) - win.wager
+        losses <- sum(wagers) - win.wager
         net.gain <- payout - losses
-        tokens$a <- tokens$a + net.gain
-        c(dice.values, dice.sum, net.gain, tokens$a)
-    
-    }, ignoreNULL = FALSE)
+        vars$tokens <- vars$tokens + net.gain
+        
+        # Function returns
+        c(dice.sum, net.gain)
+
+    })
     
     # Show the dice values
     output$dice.outcome <- renderText({
-        RollButton()
+        c(vars$die1, vars$die2, RollButton(), vars$tokens)
     })
     
 }
