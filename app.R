@@ -51,14 +51,16 @@ ui <- fluidPage(
             
         ),
 
-        # Table of the wager details
+        # Main panel for outputs
         mainPanel(
+
+            # Details of the roll results
+            textOutput("dice.values"),
+            textOutput("results1"),
+            textOutput("results2"),
+            textOutput("results3")
             
-            # Output wager details
-            tableOutput("total.wager"),
             
-            # Show the dice outcomes
-            tableOutput("dice.outcome")
             
         )
         
@@ -73,49 +75,57 @@ server <- function(input, output) {
     # Setup shared variables
     vars <- reactiveValues()
         vars$tokens <- 1000  # Initial number of tokens
-        vars$die1 <- 0  # Initial die setting
-        vars$die2 <- 0  # Initial die setting
+        vars$die1 <- 0
+        vars$die2 <- 0
+        vars$dice.sum <- 0
+        vars$win.wager <- 0
+        vars$pay.ratio <- 10
+        vars$winnings <- 0
+        vars$losses <- 0
+        vars$net.gain <- 0
 
-    # # Reactive expression to create data frame summary
-    # WagerValues <- reactive({
-    #     data.frame(
-    #         Name = c("Total Amount Wagered"),
-    #         Value = as.character(c(
-    #             sum(input$wager2, input$wager3, input$wager4))),
-    #         stringsAsFactors = FALSE)
-    # })
-    # 
-    # # Show the wager details in an HTML table
-    # output$total.wager <- renderTable({
-    #     WagerValues()
-    # })
-    
     # Function to run when roll button is clicked
     RollButton <- eventReactive(input$roll, {
         
         # Roll the dice
         vars$die1 <- sample(1:6, 1)
         vars$die2 <- sample(1:6, 1)
-        dice.sum <- sum(vars$die1, vars$die2)
+        vars$dice.sum <- sum(vars$die1, vars$die2)
 
         # Lookup wagers placed and find winning wager
         wagers <- c(rep(0, 5), input$wager2, input$wager3, input$wager4, rep(0, 4))
-        win.wager <- wagers[dice.sum]
+        vars$win.wager <- wagers[vars$dice.sum]
         
         # Calculate payout, losses, net gain, and update token quantity
-        payout <- 10 * win.wager
-        losses <- sum(wagers) - win.wager
-        net.gain <- payout - losses
-        vars$tokens <- vars$tokens + net.gain
+        vars$winnings <- vars$pay.ratio * vars$win.wager
+        vars$losses <- sum(wagers) - vars$win.wager
+        vars$net.gain <- vars$winnings - vars$losses
+        vars$tokens <- vars$tokens + vars$net.gain
         
-        # Function returns
-        c(dice.sum, net.gain)
-
     })
     
-    # Show the dice values
-    output$dice.outcome <- renderText({
-        c(vars$die1, vars$die2, RollButton(), vars$tokens)
+    # Render the dice results output
+    output$dice.values <- renderText({
+        RollButton()
+        paste("Die 1:", vars$die1, "Die 2:", vars$die2)
+    })
+    
+    output$results1 <- renderText({
+        RollButton()
+        paste("The sum is", vars$dice.sum, "and you wagered", vars$win.wager,
+              "on this outcome.")
+    })
+    
+    output$results2 <- renderText({
+        RollButton()
+        paste("This outcome pays", vars$pay.ratio, "to one, so you win",
+              vars$winnings, "tokens.")
+    })
+    
+    output$results3 <- renderText({
+        RollButton()
+        paste("You also wagered", vars$losses, "on numbers that did not win, so
+              your net gain for this round is", vars$net.gain)
     })
     
 }
