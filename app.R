@@ -66,36 +66,29 @@ ui <- fluidPage(
 )
 
 
-# dice.values <- c(0, 0)
+# tokens <- 1000
 
-
-# RollButton <- function() {
-#     dice.values2 <- sample(1:6, 2, replace = TRUE)
-# }
 
 # Server Logic------------------------------------------------------------------
 
 server <- function(input, output) {
     
-    # Reactive expression to create data frame summary
-    WagerValues <- reactive({
-        data.frame(
-            Name = c("Total Amount Wagered"),
-            Value = as.character(c(
-                sum(input$wager2, input$wager3, input$wager4))),
-            stringsAsFactors = FALSE)
-    })
+    tokens <- reactiveValues()
+    tokens$a <- 1000
     
-    # Show the wager details in an HTML table
-    output$total.wager <- renderTable({
-        WagerValues()
-    })
-    
-    # # Get dice outcomes when Roll button is clicked
-    # observeEvent(input$roll, {
-    #     dice.values2 <- sample(1:6, 2, replace = TRUE)
-    #     return(dice.values)
-    # }, ignoreNULL = FALSE)
+    # # Reactive expression to create data frame summary
+    # WagerValues <- reactive({
+    #     data.frame(
+    #         Name = c("Total Amount Wagered"),
+    #         Value = as.character(c(
+    #             sum(input$wager2, input$wager3, input$wager4))),
+    #         stringsAsFactors = FALSE)
+    # })
+    # 
+    # # Show the wager details in an HTML table
+    # output$total.wager <- renderTable({
+    #     WagerValues()
+    # })
     
     # Get dice outcomes when Roll button is clicked
     RollButton <- eventReactive(input$roll, {
@@ -108,10 +101,11 @@ server <- function(input, output) {
         wager.table <- data.frame(outcome, wagers)
         
         win.wager <- filter(wager.table, outcome == dice.sum)[[2]]
-        payout <- 5 * win.wager
+        payout <- 10 * win.wager
         losses <- sum(select(wager.table, wagers)) - win.wager
         net.gain <- payout - losses
-        c(dice.values, dice.sum, net.gain)
+        tokens$a <- tokens$a + net.gain
+        c(dice.values, dice.sum, net.gain, tokens$a)
     
     }, ignoreNULL = FALSE)
     
@@ -119,8 +113,6 @@ server <- function(input, output) {
     output$dice.outcome <- renderText({
         RollButton()
     })
-    
-
     
 }
 
