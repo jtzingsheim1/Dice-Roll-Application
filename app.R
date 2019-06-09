@@ -141,30 +141,41 @@ server <- function(input, output) {
         if (vars$wager.total > vars$tokens) {
             textOutput("wager.message")
         } else {
-            textOutput("dice.values")
-            textOutput("results1")
-            textOutput("results2")
-            textOutput("results3")
-            textOutput("results4")
+            tagList(
+                textOutput("dice.values"),
+                textOutput("results1"),
+                textOutput("results2"),
+                textOutput("results3"),
+                textOutput("results4"))
         }
         
     })
     
-    
+    output$wager.message <- renderText({
+        "Sorry, you cannot wager more tokens than you currently have, reduce
+        your bets to continue."
+    })
 
     # Function to run when roll button is clicked
     RollButton <- eventReactive(input$roll, {
 
         # Roll the dice
         vars$die1 <- sample(1:6, 1)
+            print(paste("First die:", vars$die1))
         vars$die2 <- sample(1:6, 1)
+            print(paste("Second die:", vars$die2))
         vars$dice.sum <- sum(vars$die1, vars$die2)        
+            print(paste("Dice sum:", vars$dice.sum))
         
         # Lookup wagers placed and find winning wager
         wagers <- c(input$wager2, input$wager3, input$wager4, input$wager5,
                     input$wager6, input$wager7, input$wager8, input$wager9,
                     input$wager10, input$wager11, input$wager12)
+            print(wagers)
+        vars$wager.total <- sum(wagers)
+            print(paste("Total wagered:", vars$wager.total))
         vars$win.wager <- wagers[vars$dice.sum - 1]
+            print(paste("Winning wager:", vars$win.wager))
         
         # Calculate payout, losses, net gain, and update token quantity
         vars$pay.ratio <- vars$payouts[vars$dice.sum - 1]
