@@ -102,14 +102,10 @@ ui <- fluidPage(
             
             # Display the payout table
             tableOutput("payout.table"),
-
-            # Details of the roll results
-            textOutput("dice.values"),
-            textOutput("results1"),
-            textOutput("results2"),
-            textOutput("results3"),
-            textOutput("results4")
-        
+            
+            # Display stop message or dice results as applicable
+            uiOutput("roll.output")
+            
         )
         
     )
@@ -126,6 +122,7 @@ server <- function(input, output) {
         vars$die1 <- 0
         vars$die2 <- 0
         vars$dice.sum <- 0
+        vars$wager.total <- 0
         vars$win.wager <- 0
         vars$payouts <- as.integer(c(45, 20, 13, 9, 6, 4, 6, 9, 13, 20, 45))
         vars$pay.ratio <- 0
@@ -139,15 +136,30 @@ server <- function(input, output) {
             "Outcome" = 2:12,
             "Payout Multiple" = vars$payouts)
     })
+    
+    output$roll.output <- renderUI({
+        if (vars$wager.total > vars$tokens) {
+            textOutput("wager.message")
+        } else {
+            textOutput("dice.values")
+            textOutput("results1")
+            textOutput("results2")
+            textOutput("results3")
+            textOutput("results4")
+        }
+        
+    })
+    
+    
 
     # Function to run when roll button is clicked
     RollButton <- eventReactive(input$roll, {
-        
+
         # Roll the dice
         vars$die1 <- sample(1:6, 1)
         vars$die2 <- sample(1:6, 1)
-        vars$dice.sum <- sum(vars$die1, vars$die2)
-
+        vars$dice.sum <- sum(vars$die1, vars$die2)        
+        
         # Lookup wagers placed and find winning wager
         wagers <- c(input$wager2, input$wager3, input$wager4, input$wager5,
                     input$wager6, input$wager7, input$wager8, input$wager9,
