@@ -108,6 +108,7 @@ ui <- fluidPage(
         )
         
     )
+    
 )
 
 
@@ -118,36 +119,25 @@ server <- function(input, output) {
     # Setup shared variables
     vars <- reactiveValues()
         vars$tokens <- 1000  # Initial number of tokens
-        vars$payouts <- as.integer(c(45, 20, 13, 9, 6, 4, 6, 9, 13, 20, 45))
-        vars$warn.flag <- NULL
-        
+
+    # Assemble values and table of the payouts offered for each outcome
+    Payouts <- reactive({
+        print("Assembling payout values and table")
+        # Set the payout values
+        values <- as.integer(c(45, 20, 13, 9, 6, 4, 6, 9, 13, 20, 45))
+        # Assemble into table
+        table <- data.frame(
+            "Outcome" = 2:12,
+            "Payout" = values)
+        list(values = values, table = table)
+    })
+    
     # Render a table of the payouts offered for each outcome
     output$payout.table <- renderTable({
         print("Rendering payout table")
-        data.frame(
-            "Outcome" = 2:12,
-            "Payout Multiple" = vars$payouts)
+        Payouts()$table
     })
-    
-    # # Check for valid wagers before continuing
-    # output$roll.output <- renderUI({
-    #     print("Attempting to prepare roll output")
-    #     if (!is.null(vars$warn.flag)) {
-    #         if (vars$warn.flag == TRUE) {
-    #             print("Setting output style to warning message")
-    #             textOutput("wager.message")
-    #         } else {
-    #             print("Setting output style to dice results")
-    #             tagList(
-    #                 textOutput("dice.values"),
-    #                 textOutput("results1"),
-    #                 textOutput("results2"),
-    #                 textOutput("results3"),
-    #                 textOutput("results4"))
-    #         }
-    #     }    
-    # })
-    
+
     # Check for valid wagers before continuing
     output$roll.output <- renderUI({
         print("Attempting to prepare roll output")
@@ -165,11 +155,6 @@ server <- function(input, output) {
         }
     })
     
-    output$wager.message <- renderText({
-        "Sorry, you cannot wager more tokens than you currently have, reduce
-        your bets to continue."
-    })
-
     # Function to run when roll button is clicked
     RollButton <- eventReactive(input$roll, {
 
@@ -179,48 +164,48 @@ server <- function(input, output) {
         wagers <- c(input$wager2, input$wager3, input$wager4, input$wager5,
                     input$wager6, input$wager7, input$wager8, input$wager9,
                     input$wager10, input$wager11, input$wager12)
-            print("Printing wagers vector below")
-            print(wagers)
+            #print("Printing wagers vector below")
+            #print(wagers)
         wager.total <- sum(wagers)
-            print(paste("Total wagered:", wager.total))
+            #print(paste("Total wagered:", wager.total))
         
         # Check for sufficient tokens
-        print("Checking for sufficient tokens")
+        #print("Checking for sufficient tokens")
         if (wager.total > vars$tokens) {
-            print("Total wager is great than total tokens, raise flag and stop")
+            print("Total wager exceeds total tokens, raise flag and stop")
             warn.flag <- TRUE
             list(wager.total = wager.total, warn.flag = warn.flag)
         } else {
             
-            print("Total wager is not greater than total tokens, roll dice")
-            warn.flag <- FALSE
+            print("Sufficient tokens to place wager, roll dice")
+            warn.flag <- FALSE  # Reset flag for warning message
             
             # Roll the dice
             die1 <- sample(1:6, 1)
-                print(paste("First die:", die1))
+                #print(paste("First die:", die1))
             die2 <- sample(1:6, 1)
-                print(paste("Second die:", die2))
+                #print(paste("Second die:", die2))
             dice.sum <- sum(die1, die2)        
                 print(paste("Dice sum:", dice.sum))
                 
-            # Check for winning wager
+            # Lookup winning wager and payout value
             win.wager <- wagers[dice.sum - 1]
-                print(paste("Winning wager:", win.wager))
+                #print(paste("Winning wager:", win.wager))
+            pay.ratio <- Payouts()$values[dice.sum - 1]
+                #print(paste("Pay ratio:", pay.ratio))
             
-            # Calculate payout, losses, net gain, and update token quantity
-            pay.ratio <- vars$payouts[dice.sum - 1]
-                print(paste("Pay ratio:", pay.ratio))
+            # Calculate winnings, losses, net gain, and update token quantity
             winnings <- pay.ratio * win.wager
-                print(paste("Winnings:", winnings))
+                #print(paste("Winnings:", winnings))
             losses <- wager.total - win.wager
-                print(paste("Losses:", losses))
+                #print(paste("Losses:", losses))
             net.gain <- winnings - losses
                 print(paste("Net gain:", net.gain))
             vars$tokens <- vars$tokens + net.gain
                 print(paste("Tokens:", vars$tokens))
             
             # Return all objects as a list
-            print("Returning list of RollButton variables, end of Roll Button")
+            #print("Returning list of RollButton variables, end of Roll Button")
             list(die1 = die1, die2 = die2, dice.sum = dice.sum,
                  wager.total = wager.total, win.wager = win.wager,
                  pay.ratio = pay.ratio, winnings = winnings, losses = losses,
@@ -229,41 +214,19 @@ server <- function(input, output) {
         }
 
     })
-    
-    # # Function to run when roll button is clicked
-    # RollButton <- eventReactive(input$roll, {
-    #     
-    #     # Roll the dice
-    #     vars$die1 <- sample(1:6, 1)
-    #     print(paste("First die:", vars$die1))
-    #     vars$die2 <- sample(1:6, 1)
-    #     print(paste("Second die:", vars$die2))
-    #     vars$dice.sum <- sum(vars$die1, vars$die2)        
-    #     print(paste("Dice sum:", vars$dice.sum))
-    #     
-    #     # Lookup wagers placed and find winning wager
-    #     wagers <- c(input$wager2, input$wager3, input$wager4, input$wager5,
-    #                 input$wager6, input$wager7, input$wager8, input$wager9,
-    #                 input$wager10, input$wager11, input$wager12)
-    #     print(wagers)
-    #     vars$wager.total <- sum(wagers)
-    #     print(paste("Total wagered:", vars$wager.total))
-    #     vars$win.wager <- wagers[vars$dice.sum - 1]
-    #     print(paste("Winning wager:", vars$win.wager))
-    #     
-    #     # Calculate payout, losses, net gain, and update token quantity
-    #     vars$pay.ratio <- vars$payouts[vars$dice.sum - 1]
-    #     vars$winnings <- vars$pay.ratio * vars$win.wager
-    #     vars$losses <- sum(wagers) - vars$win.wager
-    #     vars$net.gain <- vars$winnings - vars$losses
-    #     vars$tokens <- vars$tokens + vars$net.gain
-    #     
-    # })
 
+    output$wager.message <- renderText({
+        "Sorry, you cannot wager more tokens than you currently have, reduce
+        your bets to continue."
+    })
+       
     # Render the dice results output
     output$dice.values <- renderText({
         paste("First Die:", RollButton()$die1, "Second Die:", RollButton()$die2)
     })
+    
+    
+    
     
     output$results1 <- renderText({
         paste("The sum is", RollButton()$dice.sum, "and you wagered",
@@ -284,38 +247,8 @@ server <- function(input, output) {
         paste("After this round you have", vars$tokens, "remaining, good luck!")
     })
     
-    
-    
-    # # Render the dice results output
-    # output$dice.values <- renderText({
-    #     RollButton()
-    #     paste("First Die:", vars$die1, "Second Die:", vars$die2)
-    # })
-    # 
-    # output$results1 <- renderText({
-    #     RollButton()
-    #     paste("The sum is", vars$dice.sum, "and you wagered", vars$win.wager,
-    #           "on this outcome.")
-    # })
-    # 
-    # output$results2 <- renderText({
-    #     RollButton()
-    #     paste("This outcome pays", vars$pay.ratio, "to one, so you win",
-    #           vars$winnings, "tokens.")
-    # })
-    # 
-    # output$results3 <- renderText({
-    #     RollButton()
-    #     paste("You also wagered", vars$losses, "on numbers that did not win, so
-    #           your net gain is", vars$net.gain)
-    # })
-    # 
-    # output$results4 <- renderText({
-    #     RollButton()
-    #     paste("After this round you have", vars$tokens, "remaining, good luck!")
-    # })
-    
 }
+
 
 # Run Application---------------------------------------------------------------
 
