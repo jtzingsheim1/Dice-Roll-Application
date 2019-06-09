@@ -22,6 +22,7 @@ library(tidyverse)
 slider.def <- 0
 slider.min <- 0
 slider.max <- 100
+image.size <- "50px"
 
 ui <- fluidPage(
 
@@ -222,7 +223,8 @@ server <- function(input, output) {
         } else {
             print("Setting output style to dice results")
             tagList(
-                textOutput("dice.values"),
+                imageOutput("die1", width = image.size, height = image.size),
+                imageOutput("die2", width = image.size, height = image.size),
                 tableOutput("roll.results"))
         }
     })
@@ -232,11 +234,25 @@ server <- function(input, output) {
         "Sorry, you cannot wager more tokens than you currently have, reduce
         your bets to continue."
     })
-       
-    # Render the dice results output
-    output$dice.values <- renderText({
-        paste("First Die:", RollButton()$die1, "Second Die:", RollButton()$die2)
-    })
+     
+    # Render the image for the first die
+    output$die1 <- renderImage({
+        filename <- paste0("die", RollButton()$die1, ".png")
+        filepath <- normalizePath(file.path('./die_images', filename))
+        list(src = filepath, width = image.size, height = image.size)
+    }, deleteFile = FALSE)
+    
+    # Render the image for the second die
+    output$die2 <- renderImage({
+        filename <- paste0("die", RollButton()$die2, ".png")
+        filepath <- normalizePath(file.path('./die_images', filename))
+        list(src = filepath, width = image.size, height = image.size)
+    }, deleteFile = FALSE)
+     
+    # # Render the dice results output
+    # output$dice.values <- renderText({
+    #     paste("First Die:", RollButton()$die1, "Second Die:", RollButton()$die2)
+    # })
     
     # Render a table of the results from the dice roll
     output$roll.results <- renderTable({
