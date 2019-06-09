@@ -19,6 +19,7 @@ library(tidyverse)
 
 # User Interface----------------------------------------------------------------
 
+# Set configuration variables
 slider.def <- 0
 slider.min <- 0
 slider.max <- 100
@@ -91,6 +92,7 @@ ui <- fluidPage(
                         min = slider.min,
                         max = slider.max),
 
+            # Button to roll the dice
             actionButton("roll", "Roll Dice!")
             
         ),
@@ -102,10 +104,9 @@ ui <- fluidPage(
             textOutput("dice.values"),
             textOutput("results1"),
             textOutput("results2"),
-            textOutput("results3")
-            
-            
-            
+            textOutput("results3"),
+            textOutput("results4")
+        
         )
         
     )
@@ -123,7 +124,8 @@ server <- function(input, output) {
         vars$die2 <- 0
         vars$dice.sum <- 0
         vars$win.wager <- 0
-        vars$pay.ratio <- 10
+        vars$payouts <- c(45, 20, 13, 9, 6, 4, 6, 9, 13, 20, 45)
+        vars$pay.ratio <- 0
         vars$winnings <- 0
         vars$losses <- 0
         vars$net.gain <- 0
@@ -143,6 +145,7 @@ server <- function(input, output) {
         vars$win.wager <- wagers[vars$dice.sum - 1]
         
         # Calculate payout, losses, net gain, and update token quantity
+        vars$pay.ratio <- vars$payouts[vars$dice.sum - 1]
         vars$winnings <- vars$pay.ratio * vars$win.wager
         vars$losses <- sum(wagers) - vars$win.wager
         vars$net.gain <- vars$winnings - vars$losses
@@ -171,7 +174,12 @@ server <- function(input, output) {
     output$results3 <- renderText({
         RollButton()
         paste("You also wagered", vars$losses, "on numbers that did not win, so
-              your net gain for this round is", vars$net.gain)
+              your net gain is", vars$net.gain)
+    })
+    
+    output$results4 <- renderText({
+        RollButton()
+        paste("After this round you have", vars$tokens, "remaining, good luck!")
     })
     
 }
