@@ -99,6 +99,9 @@ ui <- fluidPage(
 
         # Main panel for outputs
         mainPanel(
+            
+            # Display the payout table
+            tableOutput("payout.table"),
 
             # Details of the roll results
             textOutput("dice.values"),
@@ -124,11 +127,18 @@ server <- function(input, output) {
         vars$die2 <- 0
         vars$dice.sum <- 0
         vars$win.wager <- 0
-        vars$payouts <- c(45, 20, 13, 9, 6, 4, 6, 9, 13, 20, 45)
+        vars$payouts <- as.integer(c(45, 20, 13, 9, 6, 4, 6, 9, 13, 20, 45))
         vars$pay.ratio <- 0
         vars$winnings <- 0
         vars$losses <- 0
         vars$net.gain <- 0
+        
+    # Render a table of the payouts offered for each outcome
+    output$payout.table <- renderTable({
+        data.frame(
+            "Outcome" = 2:12,
+            "Payout Multiple" = vars$payouts)
+    })
 
     # Function to run when roll button is clicked
     RollButton <- eventReactive(input$roll, {
