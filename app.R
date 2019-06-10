@@ -100,6 +100,9 @@ ui <- fluidPage(
         # Main panel for outputs
         mainPanel(
             
+            # Display instructions
+            textOutput("instructions"),
+            
             # Display token and wager details
             tableOutput("tokens.wagers"),
             
@@ -132,7 +135,7 @@ server <- function(input, output) {
         # Assemble into table
         table <- data.frame(
             "Outcome" = 2:12,
-            "Payout" = values)
+            "Payout Multiplier" = values)
         list(values = values, table = table)
     })
     
@@ -198,6 +201,18 @@ server <- function(input, output) {
         
     })
     
+    # Render the instructions message
+    output$instructions <- renderText({
+        print("Rendering instuctions")
+        "This is a game where you can place wagers on the outcome of a roll of
+        two dice. You are wagering on the sum of a single roll of the dice. If
+        you have a wager on the winning outcome then you win a multiple of that
+        amount. The multiple varies for each outcome according to the table
+        below. You lose any amounts wagered on outcomes that do not occur. Be
+        careful, the dice are fair, but the payouts are not! Have fun and good
+        luck!"
+    })
+    
     # Render a table of the current tokens and total wager
     output$tokens.wagers <- renderTable({
         print("Rendering tokens and wagers table")
@@ -249,11 +264,6 @@ server <- function(input, output) {
         list(src = filepath, width = image.size, height = image.size)
     }, deleteFile = FALSE)
      
-    # # Render the dice results output
-    # output$dice.values <- renderText({
-    #     paste("First Die:", RollButton()$die1, "Second Die:", RollButton()$die2)
-    # })
-    
     # Render a table of the results from the dice roll
     output$roll.results <- renderTable({
         print("Assembling table of the results of the dice roll")
