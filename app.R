@@ -22,100 +22,86 @@ library(tidyverse)
 slider.def <- 0
 slider.min <- 0
 slider.max <- 100
-image.size <- "50px"
+img.sz <- "100px"
 
 ui <- fluidPage(
 
     # Application title
     titlePanel("Dice Roll!"),
-
-    # Specify layout style
-    sidebarLayout(
         
-        # Sidebar panel for inputs
-        sidebarPanel(
-            
-            # Sliders for wagers
-            sliderInput("wager2",
-                        "Wager on 2:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager3",
-                         "Wager on 3:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager4",
-                         "Wager on 4:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager5",
-                        "Wager on 5:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager6",
-                        "Wager on 6:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager7",
-                        "Wager on 7:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager8",
-                        "Wager on 8:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager9",
-                        "Wager on 9:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager10",
-                        "Wager on 10:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager11",
-                        "Wager on 11:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
-            sliderInput("wager12",
-                        "Wager on 12:",
-                        value = slider.def,
-                        min = slider.min,
-                        max = slider.max),
+        fluidRow(column(2,
+                        
+                        # Display instructions
+                        textOutput("instructions"),
+                        
+                        br(),
+                        
+                        # Display the payout table
+                        tableOutput("payout.table"),
+                        
+                        # Display token and wager details
+                        tableOutput("tokens.wagers"),
+                        
+                        # Button to roll the dice
+                        actionButton("roll", "Roll Dice!")),
+                        
+                 column(2,
+                       
+                       
+                        # Sliders for wagers
+                        sliderInput("wager2", "Wager on 2:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager3", "Wager on 3:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager4", "Wager on 4:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager5", "Wager on 5:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager6", "Wager on 6:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager7", "Wager on 7:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager8", "Wager on 8:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager9", "Wager on 9:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager10", "Wager on 10:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager11", "Wager on 11:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        sliderInput("wager12", "Wager on 12:",
+                                    value = slider.def,
+                                    min = slider.min,
+                                    max = slider.max),
+                        br(), br(), br()),
+        
+                 column(3,
+                
+                        # Display stop message or dice results as applicable
+                        uiOutput("roll.output"))
 
-            # Button to roll the dice
-            actionButton("roll", "Roll Dice!")
-            
-        ),
-
-        # Main panel for outputs
-        mainPanel(
-            
-            # Display instructions
-            textOutput("instructions"),
-            
-            # Display token and wager details
-            tableOutput("tokens.wagers"),
-            
-            # Display the payout table
-            tableOutput("payout.table"),
-            
-            # Display stop message or dice results as applicable
-            uiOutput("roll.output")
-            
         )
-        
-    )
-    
+
 )
 
 
@@ -237,10 +223,13 @@ server <- function(input, output) {
             textOutput("wager.message")
         } else {
             print("Setting output style to dice results")
-            tagList(
-                imageOutput("die1", width = image.size, height = image.size),
-                imageOutput("die2", width = image.size, height = image.size),
-                tableOutput("roll.results"))
+            
+            fluidRow(
+                column(3,
+                       imageOutput("die1", width = img.sz, height = img.sz)),
+                column(3,
+                       imageOutput("die2", width = img.sz, height = img.sz)))
+            #fluidRow(br(), tableOutput("roll.results"))
         }
     })
     
@@ -254,14 +243,14 @@ server <- function(input, output) {
     output$die1 <- renderImage({
         filename <- paste0("die", RollButton()$die1, ".png")
         filepath <- normalizePath(file.path('./die_images', filename))
-        list(src = filepath, width = image.size, height = image.size)
+        list(src = filepath, width = img.sz, height = img.sz)
     }, deleteFile = FALSE)
     
     # Render the image for the second die
     output$die2 <- renderImage({
         filename <- paste0("die", RollButton()$die2, ".png")
         filepath <- normalizePath(file.path('./die_images', filename))
-        list(src = filepath, width = image.size, height = image.size)
+        list(src = filepath, width = img.sz, height = img.sz)
     }, deleteFile = FALSE)
      
     # Render a table of the results from the dice roll
