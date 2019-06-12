@@ -1,10 +1,10 @@
 # Coursera Data Science Specialization Course 9 Project 3 Script----------------
-# Dice Roll! App
+# Dice Roll! Application
 
 
-# The purpose of this script is to complete the basic requirements behind the
-# project 3 peer-graded assignment which is part of the Developing Data Products
-# course from Johns Hopkins University within the Data Science Specialization on
+# The purpose of this script is to satisfy the requirements of the project 3
+# peer-graded assignment which is part of the Developing Data Products course
+# from Johns Hopkins University within the Data Science Specialization on
 # Coursera.
 #
 # The instructions say to create an interactive application using Shiny. This
@@ -39,15 +39,24 @@ ui <- fluidPage(
                 # Left side of sidebar
                 column(6,
 
-                    # Display instructions
-                    textOutput("instructions"),
+                    # Display instructions as help text
+                    helpText("This is a game where you can place wagers on the
+                    outcome of a roll of two dice. You are wagering on the sum
+                    of a single roll of the dice. If you have a wager on the
+                    winning outcome then you win a multiple of that amount, and
+                    the multiple varies for each outcome according to the table
+                    below. You lose any amounts wagered on outcomes that do not
+                    occur. Place your wagers by using the sliders to the right
+                    and when you are ready click the Roll Dice! button below. Be
+                    careful, the dice are fair, but the payouts are not! Have
+                    fun and good luck!"),
                     
                     br(),
                     
                     # Display the payout table
                     tableOutput("payout.table"),
                     
-                    # Display token and wager details
+                    # Display current token and wager details
                     tableOutput("tokens.wagers"),
                     
                     # Button to roll the dice
@@ -116,27 +125,15 @@ ui <- fluidPage(
 
 server <- function(input, output) {
     
-    # Setup tokens as a shared variable
+    # Setup shared variables
     variables <- reactiveValues()
         variables$tokens <- 1000  # Initial number of tokens
-        variables$round <- 0  # Counter for number of rounds
+        variables$round <- 0  # Counter for number of dice rolls
         
-    # Render the instructions message
-    output$instructions <- renderText({
-        print("Rendering instuctions")
-        "This is a game where you can place wagers on the outcome of a roll of
-        two dice. You are wagering on the sum of a single roll of the dice. If
-        you have a wager on the winning outcome then you win a multiple of that
-        amount. The multiple varies for each outcome according to the table
-        below. You lose any amounts wagered on outcomes that do not occur. Be
-        careful, the dice are fair, but the payouts are not! Have fun and good
-        luck!"
-    })
-    
     # Assemble values and table of the payouts offered for each outcome
     Payouts <- reactive({
         print("Assembling payout values and table")
-        # Set the payout values
+        # Set the payout multiples
         values <- as.integer(c(45, 20, 13, 9, 6, 4, 6, 9, 13, 20, 45))
         # Assemble into table
         table <- data.frame(
@@ -182,17 +179,17 @@ server <- function(input, output) {
             
             print("Total wager exceeds total tokens, raise flag and stop")
             warn.flag <- TRUE  # Set flag for output style
-            list(warn.flag = warn.flag)  # Returns as list
-            
+
         } else {
             
             print("Sufficient tokens to place wager, proceed")
             warn.flag <- FALSE  # Reset flag for output style
             variables$round <- variables$round + 1  # Increment to trigger roll
-            list(warn.flag = warn.flag)  # Returns as list
-            
+
         }
-        
+
+        list(warn.flag = warn.flag)  # Returns as list
+                
     })
     
     RollTheDice <- eventReactive(variables$round, {
@@ -205,7 +202,7 @@ server <- function(input, output) {
         dice.sum <- sum(die1, die2)        
         print(paste("Dice sum:", dice.sum))
         
-        # Lookup winning wager and payout value
+        # Lookup winning wager and payout values
         win.wager <- Wagers()$values[dice.sum - 1]
         payout <- Payouts()$values[dice.sum - 1]
 
@@ -223,12 +220,12 @@ server <- function(input, output) {
              losses = losses, net.gain = net.gain)
     })
     
-    # Determine the output type based on wager validity
+    # Determine the output format based on wager validity
     output$roll.output <- renderUI({
         print("Attempting to prepare roll output")
         if (RollButton()$warn.flag) {
             print("Setting output style to warning message")
-            textOutput("wager.message")
+            h3(textOutput("wager.message"))
         } else {
             print("Setting output style to dice results")
             list(fluidRow(
@@ -243,6 +240,7 @@ server <- function(input, output) {
     
     # Render the warning message for insufficient tokens
     output$wager.message <- renderText({
+        print("Rendering wager warning message")
         "Sorry, you cannot wager more tokens than you currently have, reduce
         your bets to continue."
     })
@@ -264,7 +262,7 @@ server <- function(input, output) {
     # Render a table of the results from the dice roll
     output$roll.results <- renderTable({
         print("Assembling table of the results of the dice roll")
-        var.names <- c("Dice Sum", "Wager on Outcome", "Outcome Payout",
+        var.names <- c("Dice Sum", "Wager on Outcome", "Payout Multiplier",
                        "Amount Won", "Amount Lost", "Net Gain",
                        "Remaining Tokens")
         variables <- as.integer(c(RollTheDice()$dice.sum,
