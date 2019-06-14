@@ -12,6 +12,7 @@ used for all parts of the project.
 [1]: https://www.coursera.org/learn/data-products  "Developing Data Products"
 [2]: https://www.coursera.org/specializations/jhu-data-science  "DS Spec."
 [3]: https://github.com/jtzingsheim1/Dice-Roll-App-Presentation "Repo for pres"
+[4]: https://jtzingsheim.shinyapps.io/Dice_Roll_Game/  "shinyapps.io"
 
 
 ## Brief Description
@@ -22,7 +23,8 @@ and this is located in another [repo][3]. The original instructions for this
 assignment are shown below. We were free to choose our own topic, and I decided
 to make a simple game based on the rolling of two dice. This repo contains the
 application script and a folder of the dice images used as output. The script
-uses the `shiny` package to build and run the package.
+uses the `shiny` package to build and run the package. The application is hosted
+on shinyapps.io [here][4].
 
 
 ## Original Project Instructions
