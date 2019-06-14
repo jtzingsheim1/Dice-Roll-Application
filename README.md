@@ -6,22 +6,23 @@
 This repo contains my work from the week 4 project from the
 [Developing Data Products][1] class from Johns Hopkins University within the
 [Data Science Specialization][2] on Coursera. The original instructions for the
-project can be found beneath the brief description section below. The script was
-created in RStudio.
+project can be found beneath the brief description section below. RStudio was
+used for all parts of the project.
 
 [1]: https://www.coursera.org/learn/data-products  "Developing Data Products"
 [2]: https://www.coursera.org/specializations/jhu-data-science  "DS Spec."
+[3]: https://github.com/jtzingsheim1/Dice-Roll-App-Presentation "Repo for pres"
 
 
 ## Brief Description
 
-The original instructions for this assignment are shown below. We were free to
-choose our own topic, and I decided to make a simple game based on the rolling
-of two dice. The repo contains the application script and a folder of the dice
-images used as output. The script uses the `shiny` package to build and run the
-package. The project required two deliverables - one of which is the
-application. The second deliverable is a presentation pitching the merits of the
-app, and that presentation will go in a different repo.
+The project required two deliverables - one of which is the application in this
+repo. The second deliverable is a presentation pitching the merits of the app,
+and this is located in another [repo][3]. The original instructions for this
+assignment are shown below. We were free to choose our own topic, and I decided
+to make a simple game based on the rolling of two dice. This repo contains the
+application script and a folder of the dice images used as output. The script
+uses the `shiny` package to build and run the package.
 
 
 ## Original Project Instructions
